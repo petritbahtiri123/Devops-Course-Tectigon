@@ -1,0 +1,117 @@
+- name: Ensure project directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ ansible_env.HOME }}/final-task"
+    - "{{ ansible_env.HOME }}/final-task/generated"
+    - "{{ ansible_env.HOME }}/final-task/k8s"
+    - "{{ ansible_env.HOME }}/final-task/scripts"
+
+- name: Ensure .env exists
+  copy:
+    dest: "{{ ansible_env.HOME }}/final-task/.env"
+    force: false
+    mode: "0644"
+    content: |
+      APP_VERSION=v1
+      APP_PORT=5000
+
+      DB_HOST=postgres
+      DB_PORT=5432
+      DB_NAME=appdb
+      DB_USER=appuser
+      DB_PASSWORD=apppass
+
+      POSTGRES_DB=appdb
+      POSTGRES_USER=appuser
+      POSTGRES_PASSWORD=apppass
+
+- name: Check kubectl
+  command: kubectl version --client
+  register: kubectl_check
+  failed_when: false
+  changed_when: false
+
+- name: Show kubectl status
+  debug:
+    msg: "kubectl present={{ kubectl_check.rc == 0 }}"
+
+- name: Check kind
+  command: kind version
+  register: kind_check
+  failed_when: false
+  changed_when: false
+
+- name: Show kind status
+  debug:
+    msg: "kind present={{ kind_check.rc == 0 }}"
+
+- name: Check helm
+  command: helm version --short
+  register: helm_check
+  failed_when: false
+  changed_when: false
+
+- name: Show helm status
+  debug:
+    msg: "helm present={{ helm_check.rc == 0 }}"
+- name: Download kubectl
+  get_url:
+    url: https://dl.k8s.io/release/v1.29.2/bin/linux/amd64/kubectl
+    dest: /tmp/kubectl
+    mode: "0755"
+  become: true
+  when: kubectl_check.rc != 0
+
+- name: Install kubectl
+  copy:
+    src: /tmp/kubectl
+    dest: /usr/local/bin/kubectl
+    remote_src: true
+    mode: "0755"
+  become: true
+  when: kubectl_check.rc != 0
+
+- name: Download kind
+  get_url:
+    url: https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-amd64
+    dest: /tmp/kind
+    mode: "0755"
+  become: true
+  when: kind_check.rc != 0
+
+- name: Install kind
+  copy:
+    src: /tmp/kind
+    dest: /usr/local/bin/kind
+    remote_src: true
+    mode: "0755"
+  become: true
+  when: kind_check.rc != 0
+
+- name: Download Helm archive
+  get_url:
+    url: https://get.helm.sh/helm-v3.14.3-linux-amd64.tar.gz
+    dest: /tmp/helm.tar.gz
+    mode: "0644"
+  become: true
+  when: helm_check.rc != 0
+
+- name: Extract Helm archive
+  unarchive:
+    src: /tmp/helm.tar.gz
+    dest: /tmp
+    remote_src: true
+  become: true
+  when: helm_check.rc != 0
+
+- name: Install Helm
+  copy:
+    src: /tmp/linux-amd64/helm
+    dest: /usr/local/bin/helm
+    remote_src: true
+    mode: "0755"
+  become: true
+  when: helm_check.rc != 0

@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Env
+.env
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+
+# Generated artifacts
+generated/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Ansible retry
+*.retry

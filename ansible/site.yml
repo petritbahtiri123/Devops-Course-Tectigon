@@ -1,0 +1,5 @@
+- name: Bootstrap local WSL environment
+  hosts: local
+  become: true
+  roles:
+    - bootstrap

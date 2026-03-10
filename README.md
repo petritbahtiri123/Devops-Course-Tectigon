@@ -639,6 +639,3 @@ Author
 Petrit Bahtiri
 
 Implemented in WSL Ubuntu as a local DevOps mini-platform final task.
-
-
-Small fix before you paste it: if your repo does **not** contain `.env.example`, create
